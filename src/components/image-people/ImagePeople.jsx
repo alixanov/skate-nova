@@ -181,7 +181,6 @@ const CharacterSelect = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Card appearance animations
     characters.forEach((character, index) => {
       const card = cardRefs.current[index];
       if (!card) return;
@@ -197,14 +196,12 @@ const CharacterSelect = () => {
               duration: 0.8,
               ease: 'back.out(1.7)',
               onStart: () => {
-                // Spark effect
                 gsap.to(card, {
                   boxShadow: `0 0 20px ${character.glowColor}`,
                   duration: 0.3,
                   repeat: 3,
                   yoyo: true,
                 });
-                // Camera shake
                 gsap.to(containerRef.current, {
                   x: '+=5',
                   y: '+=5',
@@ -226,7 +223,6 @@ const CharacterSelect = () => {
               duration: 1,
               ease: 'power2.out',
               onStart: () => {
-                // Pulse effect
                 gsap.to(card, {
                   scale: 1.05,
                   duration: 0.5,
@@ -249,7 +245,6 @@ const CharacterSelect = () => {
               duration: 1,
               ease: 'elastic.out(1, 0.5)',
               onStart: () => {
-                // Color flash
                 gsap.to(card, {
                   boxShadow: `0 0 30px ${character.glowColor}`,
                   duration: 0.4,
@@ -265,7 +260,6 @@ const CharacterSelect = () => {
       }
     });
 
-    // Air particles
     const createParticle = () => {
       const particle = document.createElement('div');
       particle.className = 'particle';
@@ -352,18 +346,15 @@ const CharacterSelect = () => {
   };
 
   const handleSelect = (characterName) => {
-    // Transition animation
     gsap.to(containerRef.current, {
       opacity: 0,
       scale: 0.8,
       duration: 0.5,
       ease: 'power2.in',
       onComplete: () => {
-        navigate('/game');
+        navigate(`/game?character=${characterName}`);
       },
     });
-
-    // Explosive effect
     gsap.to(containerRef.current, {
       boxShadow: '0 0 50px rgba(247, 37, 133, 0.8)',
       duration: 0.2,
@@ -377,7 +368,6 @@ const CharacterSelect = () => {
       <Title>🛹 CHOOSE YOUR HERO</Title>
       <Subtitle>SkateNova awaits! Pick your street legend!</Subtitle>
       <Subtitle>Three skate warriors are ready to conquer the track. Who are you in this world of speed?</Subtitle>
-
       <CharactersGrid>
         {characters.map((character, index) => (
           <CharacterCard
