@@ -1,10 +1,9 @@
-import React, { useEffect, useRef } from 'react';
-import styled from 'styled-components';
-import { gsap } from 'gsap';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import blaze from '../../assets/1.png';
 import shadow from '../../assets/2.png';
 import nova from '../../assets/3.png';
+import personaj from "../../assets/personaj.jpg"
 
 const characters = [
   {
@@ -15,8 +14,11 @@ const characters = [
     image: blaze,
     emoji: '🔥',
     animation: 'blaze',
-    bgGradient: 'linear-gradient(135deg, #FF006E 0%, #FF8E53 100%)',
-    glowColor: 'rgba(255, 0, 110, 0.7)',
+    bgGradient: 'linear-gradient(135deg, #FF416C 0%, #FF9900 100%)', // Hot red to orange
+    glowColor: 'rgba(255, 65, 108, 0.7)', // Neon red glow
+    cornerColor: '#FF9900', // Orange accent
+    isLocked: false,
+    statusBadge: 'READY'
   },
   {
     name: 'Shadow',
@@ -26,8 +28,11 @@ const characters = [
     image: shadow,
     emoji: '🌌',
     animation: 'shadow',
-    bgGradient: 'linear-gradient(135deg, #1E1E5F 0%, #00D4FF 100%)',
-    glowColor: 'rgba(0, 212, 255, 0.7)',
+    bgGradient: 'linear-gradient(135deg, #303F9F 0%, #00C9FF 100%)', // Deep blue to cyan
+    glowColor: 'rgba(0, 201, 255, 0.7)', // Cyan glow
+    cornerColor: '#7F00FF', // Purple accent
+    isLocked: true,
+    statusBadge: 'LOCKED'
   },
   {
     name: 'Nova',
@@ -37,367 +42,538 @@ const characters = [
     image: nova,
     emoji: '🌟',
     animation: 'nova',
-    bgGradient: 'linear-gradient(135deg, #2A4D69 0%, #00F4D6 100%)',
-    glowColor: 'rgba(0, 244, 214, 0.7)',
+    bgGradient: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)', // Instagram-inspired gradient
+    glowColor: 'rgba(252, 176, 69, 0.7)', // Gold glow
+    cornerColor: '#fd1d1d', // Red accent
+    isLocked: true,
+    statusBadge: 'LOCKED'
   },
 ];
-
-const ImageContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 2rem;
-  background: linear-gradient(rgba(8, 24, 68, 0.75), rgba(98, 0, 234, 0.75)),
-              linear-gradient(to right, #F72585, #4CC9F0);
-  min-height: 100vh;
-  position: relative;
-  overflow: hidden;
-  box-sizing: border-box;
-  font-family: 'JetBrains Mono', monospace;
-`;
-
-const Title = styled.h2`
-  font-size: 2.5rem;
-  color: #fff;
-  text-shadow: 0 0 12px rgba(247, 37, 133, 0.8);
-  margin-bottom: 1rem;
-  text-align: center;
-  font-family: 'JetBrains Mono', monospace;
-`;
-
-const Subtitle = styled.p`
-  font-size: 1.2rem;
-  color: #e0e0e0;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
-  margin-bottom: 1rem;
-  text-align: center;
-  max-width: 600px;
-  font-family: 'JetBrains Mono', monospace;
-`;
-
-const CharactersGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
-  width: 100%;
-  margin-top: 2rem;
-  z-index: 2;
-`;
-
-const CharacterCard = styled.div`
-  background: ${({ bgGradient }) => bgGradient};
-  border-radius: 15px;
-  padding: 1.2rem;
-  text-align: center;
-  transition: transform 0.4s ease, box-shadow 0.4s ease;
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px ${({ glowColor }) => glowColor};
-  box-sizing: border-box;
-
-  &:hover {
-    transform: translateY(-12px) scale(1.02);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px ${({ glowColor }) => glowColor};
-  }
-
-  @media (max-width: 600px) {
-    padding: 0.8rem;
-  }
-`;
-
-const CharacterImage = styled.img`
-  width: 100%;
-  max-width: 180px;
-  height: auto;
-  border-radius: 8px;
-  margin-bottom: 1rem;
-  transition: transform 0.4s ease;
-`;
-
-const CharacterName = styled.h3`
-  font-size: 1.6rem;
-  color: #fff;
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  font-family: 'JetBrains Mono', monospace;
-`;
-
-const CharacterDescription = styled.p`
-  font-size: 0.95rem;
-  color: #e0e0e0;
-  margin-bottom: 0.5rem;
-  font-family: 'JetBrains Mono', monospace;
-`;
-
-const CharacterSkill = styled.p`
-  font-size: 0.9rem;
-  color: #4CC9F0;
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  font-family: 'JetBrains Mono', monospace;
-`;
-
-const FullDescription = styled.p`
-  font-size: 0.85rem;
-  color: #b0b0b0;
-  font-style: italic;
-  font-family: 'JetBrains Mono', monospace;
-`;
-
-const SelectButton = styled.button`
-  background: linear-gradient(45deg, #F72585, #4CC9F0);
-  color: #fff;
-  padding: 0.8rem 1.5rem;
-  border: none;
-  border-radius: 25px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  font-family: 'JetBrains Mono', monospace;
-
-  &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 0 15px rgba(76, 201, 240, 0.7);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-`;
-
-const Particle = styled.div`
-  position: absolute;
-  width: 5px;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  pointer-events: none;
-`;
 
 const CharacterSelect = () => {
   const containerRef = useRef(null);
   const cardRefs = useRef([]);
   const navigate = useNavigate();
+  const [selectedIndex, setSelectedIndex] = useState(null);
 
   useEffect(() => {
-    characters.forEach((character, index) => {
-      const card = cardRefs.current[index];
+    // Create background effect
+    const container = containerRef.current;
+    if (!container) return;
+
+    // Create dynamic background elements
+    for (let i = 0; i < 40; i++) {
+      const element = document.createElement('div');
+      element.className = 'bg-element';
+
+      // Randomize properties
+      const size = Math.random() * 100 + 50;
+      const posX = Math.random() * 100;
+      const posY = Math.random() * 100;
+      const duration = Math.random() * 50 + 30;
+      const delay = Math.random() * -50;
+
+      // Apply styles
+      element.style.width = `${size}px`;
+      element.style.height = `${size}px`;
+      element.style.left = `${posX}%`;
+      element.style.top = `${posY}%`;
+      element.style.opacity = Math.random() * 0.3;
+      element.style.position = 'absolute';
+      element.style.borderRadius = '50%';
+      element.style.background = `radial-gradient(circle, ${['rgba(255,65,108,0.3)', 'rgba(0,201,255,0.3)', 'rgba(252,176,69,0.3)'][Math.floor(Math.random() * 3)]} 0%, transparent 70%)`;
+      element.style.filter = 'blur(8px)';
+      element.style.animation = `float ${duration}s ${delay}s infinite linear`;
+      element.style.zIndex = '0';
+
+      container.appendChild(element);
+    }
+
+    // Add animation keyframes
+    const styleSheet = document.createElement('style');
+    styleSheet.innerHTML = `
+      @keyframes float {
+        0% { transform: translate(0, 0) rotate(0); }
+        25% { transform: translate(100px, 100px) rotate(90deg); }
+        50% { transform: translate(0, 200px) rotate(180deg); }
+        75% { transform: translate(-100px, 100px) rotate(270deg); }
+        100% { transform: translate(0, 0) rotate(360deg); }
+      }
+      
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      
+      @keyframes glitch {
+        0% { transform: translate(0); }
+        20% { transform: translate(-3px, 3px); }
+        40% { transform: translate(-3px, -3px); }
+        60% { transform: translate(3px, 3px); }
+        80% { transform: translate(3px, -3px); }
+        100% { transform: translate(0); }
+      }
+      
+      @keyframes neon-border {
+        0%, 100% { box-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; }
+        50% { box-shadow: 0 0 15px currentColor, 0 0 25px currentColor, 0 0 40px currentColor; }
+      }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // Card entrance animations
+    cardRefs.current.forEach((card, index) => {
       if (!card) return;
 
-      switch (character.animation) {
-        case 'blaze':
-          gsap.fromTo(
-            card,
-            { scale: 0, opacity: 0 },
-            {
-              scale: 1,
-              opacity: 1,
-              duration: 0.8,
-              ease: 'back.out(1.7)',
-              onStart: () => {
-                gsap.to(card, {
-                  boxShadow: `0 0 20px ${character.glowColor}`,
-                  duration: 0.3,
-                  repeat: 3,
-                  yoyo: true,
-                });
-                gsap.to(containerRef.current, {
-                  x: '+=5',
-                  y: '+=5',
-                  duration: 0.1,
-                  repeat: 5,
-                  yoyo: true,
-                });
-              },
-            }
-          );
-          break;
-        case 'shadow':
-          gsap.fromTo(
-            card,
-            { opacity: 0, y: 50 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 1,
-              ease: 'power2.out',
-              onStart: () => {
-                gsap.to(card, {
-                  scale: 1.05,
-                  duration: 0.5,
-                  repeat: 2,
-                  yoyo: true,
-                  ease: 'sine.inOut',
-                });
-              },
-            }
-          );
-          break;
-        case 'nova':
-          gsap.fromTo(
-            card,
-            { rotation: 360, opacity: 0, y: -100 },
-            {
-              rotation: 0,
-              opacity: 1,
-              y: 0,
-              duration: 1,
-              ease: 'elastic.out(1, 0.5)',
-              onStart: () => {
-                gsap.to(card, {
-                  boxShadow: `0 0 30px ${character.glowColor}`,
-                  duration: 0.4,
-                  repeat: 2,
-                  yoyo: true,
-                });
-              },
-            }
-          );
-          break;
-        default:
-          break;
-      }
+      setTimeout(() => {
+        card.style.opacity = characters[index].isLocked ? '0.7' : '1';
+        card.style.transform = 'translateY(0) scale(1)';
+      }, index * 200);
     });
 
-    const createParticle = () => {
-      const particle = document.createElement('div');
-      particle.className = 'particle';
-      containerRef.current.appendChild(particle);
-
-      const x = Math.random() * window.innerWidth;
-      const y = Math.random() * window.innerHeight;
-
-      gsap.set(particle, { x, y });
-      gsap.to(particle, {
-        x: x + (Math.random() - 0.5) * 200,
-        y: y + (Math.random() - 0.5) * 200,
-        opacity: 0,
-        scale: 0,
-        duration: Math.random() * 2 + 1,
-        ease: 'power1.out',
-        onComplete: () => {
-          particle.remove();
-        },
-      });
+    return () => {
+      document.head.removeChild(styleSheet);
     };
-
-    const particleInterval = setInterval(createParticle, 200);
-    return () => clearInterval(particleInterval);
   }, []);
 
-  const handleHover = (index) => {
-    const card = cardRefs.current[index];
-    gsap.to(card, {
-      scale: 1.03,
-      boxShadow: `0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px ${characters[index].glowColor}`,
-      duration: 0.4,
-      ease: 'power2.out',
+  const handleCardHover = (index) => {
+    if (characters[index].isLocked) return;
+
+    cardRefs.current.forEach((card, i) => {
+      if (i !== index) {
+        card.style.transform = 'scale(0.95)';
+        card.style.opacity = '0.7';
+      } else {
+        card.style.transform = 'scale(1.05) translateY(-10px)';
+        card.style.opacity = '1';
+        const img = card.querySelector('.character-image');
+        if (img) {
+          img.style.transform = 'scale(1.1)';
+        }
+      }
     });
-    switch (characters[index].animation) {
-      case 'blaze':
-        gsap.to(card.querySelector('img'), {
-          scale: 1.15,
-          rotation: 8,
-          duration: 0.4,
-          ease: 'power2.out',
-        });
-        break;
-      case 'shadow':
-        gsap.to(card.querySelector('img'), {
-          x: -12,
-          opacity: 0.85,
-          duration: 0.4,
-          ease: 'sine.inOut',
-          repeat: 1,
-          yoyo: true,
-        });
-        break;
-      case 'nova':
-        gsap.to(card.querySelector('img'), {
-          y: -25,
-          rotation: -6,
-          duration: 0.5,
-          ease: 'elastic.out(1, 0.5)',
-        });
-        break;
-      default:
-        break;
+  };
+
+  const handleCardLeave = () => {
+    cardRefs.current.forEach((card, i) => {
+      card.style.transform = 'scale(1)';
+      card.style.opacity = characters[i].isLocked ? '0.7' : '1';
+      const img = card.querySelector('.character-image');
+      if (img) {
+        img.style.transform = 'scale(1)';
+      }
+    });
+  };
+
+  const handleSelect = (characterName, index) => {
+    if (characters[index].isLocked) return;
+
+    setSelectedIndex(index);
+
+    // Add selection animation
+    const card = cardRefs.current[index];
+    if (card) {
+      card.style.animation = 'pulse 0.6s ease infinite';
+
+      // Create energy burst effect
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'energy-particle';
+
+        // Style the particle
+        particle.style.position = 'absolute';
+        particle.style.width = `${Math.random() * 10 + 5}px`;
+        particle.style.height = particle.style.width;
+        particle.style.borderRadius = '50%';
+        particle.style.backgroundColor = characters[index].cornerColor;
+        particle.style.boxShadow = `0 0 10px ${characters[index].cornerColor}`;
+        particle.style.zIndex = '10';
+
+        card.appendChild(particle);
+
+        // Animate the particle
+        const angle = Math.random() * Math.PI * 2;
+        const distance = Math.random() * 100 + 50;
+        const duration = Math.random() * 0.5 + 0.5;
+
+        particle.animate([
+          { transform: 'translate(0, 0) scale(0)', opacity: 1 },
+          { transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(1)`, opacity: 0 }
+        ], {
+          duration: duration * 1000,
+          easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+        }).onfinish = () => particle.remove();
+      }
     }
-  };
 
-  const handleLeave = (index) => {
-    const card = cardRefs.current[index];
-    gsap.to(card, {
-      scale: 1,
-      boxShadow: `0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px ${characters[index].glowColor}`,
-      duration: 0.4,
-      ease: 'power2.out',
-    });
-    gsap.to(card.querySelector('img'), {
-      scale: 1,
-      x: 0,
-      y: 0,
-      rotation: 0,
-      opacity: 1,
-      duration: 0.4,
-      ease: 'power2.out',
-    });
-  };
-
-  const handleSelect = (characterName) => {
-    gsap.to(containerRef.current, {
-      opacity: 0,
-      scale: 0.8,
-      duration: 0.5,
-      ease: 'power2.in',
-      onComplete: () => {
-        navigate(`/game?character=${characterName}`);
-      },
-    });
-    gsap.to(containerRef.current, {
-      boxShadow: '0 0 50px rgba(247, 37, 133, 0.8)',
-      duration: 0.2,
-      repeat: 2,
-      yoyo: true,
-    });
+    // Navigate after animation
+    setTimeout(() => {
+      navigate(`/game?character=${characterName}`);
+    }, 1000);
   };
 
   return (
-    <ImageContainer ref={containerRef} className="character-select">
-      <Title>🛹 CHOOSE YOUR HERO</Title>
-      <Subtitle>SkateNova awaits! Pick your street legend!</Subtitle>
-      <Subtitle>Three skate warriors are ready to conquer the track. Who are you in this world of speed?</Subtitle>
-      <CharactersGrid>
+    <div
+      ref={containerRef}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        padding: '2rem',
+        background: 'linear-gradient(135deg, #0F0F1F 0%, #1F1F3F 100%)',
+        minHeight: '100vh',
+        position: 'relative',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
+        fontFamily: "'JetBrains Mono', monospace",
+        fontWeight: 400
+      }}
+    >
+      {/* Animated title */}
+      <div
+        style={{
+          position: 'relative',
+          marginBottom: '3rem',
+          textAlign: 'center'
+        }}
+      >
+        <h1
+          style={{
+            fontSize: '3.5rem',
+            fontWeight: 700,
+            margin: '0',
+            padding: '0',
+            background: 'linear-gradient(to right, #FF416C, #FF9900, #00C9FF, #fcb045)',
+            backgroundClip: 'text',
+            textFillColor: 'transparent',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            textShadow: '0 0 30px rgba(255, 255, 255, 0.2)',
+            letterSpacing: '3px',
+            transform: 'skew(-5deg)',
+            fontFamily: "'JetBrains Mono', monospace"
+          }}
+        >
+          🛹 SKATE NOVA 🛹
+        </h1>
+        <div
+          style={{
+            fontSize: '1.4rem',
+            color: '#CCD6F6',
+            opacity: '0.8',
+            marginTop: '0.5rem',
+            textShadow: '0 0 10px rgba(204, 214, 246, 0.5)',
+            fontWeight: 400,
+            fontFamily: "'JetBrains Mono', monospace"
+          }}
+        >
+          CHOOSE YOUR LEGEND
+        </div>
+
+        {/* Horizontal line with glow */}
+        <div
+          style={{
+            width: '100%',
+            height: '3px',
+            background: 'linear-gradient(to right, transparent, #FF416C, #00C9FF, transparent)',
+            margin: '1.5rem 0',
+            boxShadow: '0 0 10px rgba(255, 65, 108, 0.5)',
+            maxWidth: '600px',
+            marginLeft: 'auto',
+            marginRight: 'auto'
+          }}
+        />
+      </div>
+
+      {/* Character cards container */}
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '2rem',
+          width: '100%',
+          maxWidth: '1200px',
+          flexWrap: 'wrap',
+          zIndex: '1'
+        }}
+      >
         {characters.map((character, index) => (
-          <CharacterCard
+          <div
             key={character.name}
-            ref={(el) => (cardRefs.current[index] = el)}
-            bgGradient={character.bgGradient}
-            glowColor={character.glowColor}
-            onMouseEnter={() => handleHover(index)}
-            onMouseLeave={() => handleLeave(index)}
+            ref={el => cardRefs.current[index] = el}
+            style={{
+              width: '320px',
+              background: character.bgGradient,
+              borderRadius: '20px',
+              padding: '1rem',
+              boxShadow: `0 10px 30px rgba(0, 0, 0, 0.3), 0 0 20px ${character.glowColor}`,
+              position: 'relative',
+              overflow: 'hidden',
+              transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+              opacity: '0',
+              transform: 'translateY(50px) scale(0.8)',
+              border: `2px solid ${character.cornerColor}`,
+              backdropFilter: 'blur(10px)'
+            }}
+            onMouseEnter={() => handleCardHover(index)}
+            onMouseLeave={handleCardLeave}
+            onClick={() => handleSelect(character.name, index)}
           >
-            <CharacterImage src={character.image} alt={character.name} />
-            <CharacterName>
-              {character.emoji} {character.name}
-            </CharacterName>
-            <CharacterDescription>{character.description}</CharacterDescription>
-            <CharacterSkill>Skill: {character.skill}</CharacterSkill>
-            <FullDescription>{character.fullDescription}</FullDescription>
-            <SelectButton onClick={() => handleSelect(character.name)}>
-              Select
-            </SelectButton>
-          </CharacterCard>
+            {/* Card background effects */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '-50%',
+                left: '-50%',
+                width: '200%',
+                height: '200%',
+                background: `radial-gradient(circle at top right, ${character.cornerColor}22, transparent 70%)`,
+                zIndex: '0'
+              }}
+            />
+
+            {/* Status badge */}
+            <div
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: character.isLocked ? '#2A2A3A' : character.cornerColor,
+                color: character.isLocked ? '#8A8A9A' : 'white',
+                padding: '0.3rem 0.8rem',
+                borderRadius: '20px',
+                fontSize: '0.7rem',
+                fontWeight: 600,
+                letterSpacing: '1px',
+                zIndex: '10',
+                boxShadow: character.isLocked ? 'none' : `0 0 10px ${character.cornerColor}`,
+                border: `1px solid ${character.isLocked ? '#555' : character.cornerColor + '99'}`,
+                fontFamily: "'JetBrains Mono', monospace"
+              }}
+            >
+              {character.statusBadge}
+            </div>
+
+            {/* Character image */}
+            <div
+              style={{
+                position: 'relative',
+                width: '100%',
+                height: '230px',
+                margin: '0.5rem 0 1.5rem',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: '5'
+              }}
+            >
+              <img
+                src={character.image}
+                alt={character.name}
+                className="character-image"
+                style={{
+                  maxWidth: '90%',
+                  maxHeight: '90%',
+                  objectFit: 'contain',
+                  borderRadius: '10px',
+                  transition: 'transform 0.3s ease',
+                  filter: character.isLocked ? 'grayscale(80%) brightness(0.7)' : `drop-shadow(0 0 10px ${character.glowColor})`
+                }}
+              />
+
+              {/* Locked overlay */}
+              {character.isLocked && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    background: 'rgba(0, 0, 0, 0.5)',
+                    borderRadius: '50%',
+                    width: '80px',
+                    height: '80px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    fontSize: '2rem',
+                    boxShadow: '0 0 20px rgba(0, 0, 0, 0.5)',
+                    zIndex: '10',
+                    backdropFilter: 'blur(5px)',
+                    border: '2px solid rgba(255, 255, 255, 0.2)',
+                    fontFamily: "'JetBrains Mono', monospace"
+                  }}
+                >
+                  🔒
+                </div>
+              )}
+            </div>
+
+            {/* Character info */}
+            <div style={{ zIndex: '5', position: 'relative' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginBottom: '0.5rem'
+                }}
+              >
+                <span style={{ fontSize: '1.5rem', marginRight: '0.5rem', fontFamily: "'JetBrains Mono', monospace" }}>{character.emoji}</span>
+                <h2
+                  style={{
+                    margin: '0',
+                    fontSize: '1.8rem',
+                    fontWeight: 700,
+                    background: 'linear-gradient(to right, white, #CCD6F6)',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent',
+                    textShadow: '0 2px 10px rgba(0, 0, 0, 0.3)',
+                    fontFamily: "'JetBrains Mono', monospace"
+                  }}
+                >
+                  {character.name}
+                </h2>
+              </div>
+
+              <div
+                style={{
+                  fontSize: '1rem',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  textAlign: 'center',
+                  marginBottom: '0.7rem',
+                  fontWeight: 400,
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)',
+                  fontFamily: "'JetBrains Mono', monospace"
+                }}
+              >
+                {character.description}
+              </div>
+
+              <div
+                style={{
+                  fontSize: '0.85rem',
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  textAlign: 'center',
+                  marginBottom: '0.7rem',
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  fontFamily: "'JetBrains Mono', monospace"
+                }}
+              >
+                {character.fullDescription}
+              </div>
+
+              {/* Skill tag */}
+              <div
+                style={{
+                  background: `rgba(0, 0, 0, 0.3)`,
+                  padding: '0.5rem',
+                  borderRadius: '10px',
+                  marginBottom: '1rem',
+                  border: `1px solid ${character.cornerColor}40`,
+                  backdropFilter: 'blur(5px)'
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: '0.7rem',
+                    color: character.cornerColor,
+                    fontWeight: 600,
+                    marginBottom: '0.3rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    fontFamily: "'JetBrains Mono', monospace"
+                  }}
+                >
+                  SPECIAL SKILL
+                </div>
+                <div
+                  style={{
+                    fontSize: '0.9rem',
+                    color: 'white',
+                    fontWeight: 400,
+                    textShadow: `0 0 5px ${character.glowColor}`,
+                    fontFamily: "'JetBrains Mono', monospace"
+                  }}
+                >
+                  {character.skill}
+                </div>
+              </div>
+            </div>
+
+            {/* Select button */}
+            <button
+              style={{
+                width: '100%',
+                padding: '0.8rem',
+                background: character.isLocked
+                  ? 'linear-gradient(to right, #333, #555)'
+                  : `linear-gradient(to right, ${character.cornerColor}, ${character.glowColor.replace('0.7', '1')})`,
+                border: 'none',
+                borderRadius: '10px',
+                color: 'white',
+                fontWeight: 700,
+                fontSize: '1rem',
+                cursor: character.isLocked ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                textTransform: 'uppercase',
+                letterSpacing: '2px',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: character.isLocked
+                  ? 'none'
+                  : `0 5px 15px ${character.glowColor}`,
+                opacity: character.isLocked ? 0.7 : 1,
+                zIndex: '5',
+                fontFamily: "'JetBrains Mono', monospace"
+              }}
+              disabled={character.isLocked}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!character.isLocked) handleSelect(character.name, index);
+              }}
+            >
+              {character.isLocked ? 'LOCKED' : 'SELECT'}
+
+              {/* Button shine effect */}
+              {!character.isLocked && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: '-50%',
+                    left: '-100%',
+                    width: '50%',
+                    height: '200%',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    transform: 'rotate(30deg)',
+                    transition: 'left 0.7s ease'
+                  }}
+                />
+              )}
+            </button>
+
+            {/* Lock message */}
+            {character.isLocked && (
+              <div
+                style={{
+                  textAlign: 'center',
+                  color: '#8A8A9A',
+                  fontSize: '0.8rem',
+                  marginTop: '0.5rem',
+                  fontStyle: 'italic',
+                  fontWeight: 400,
+                  fontFamily: "'JetBrains Mono', monospace"
+                }}
+              >
+                Complete Stage 1 to unlock
+              </div>
+            )}
+          </div>
         ))}
-      </CharactersGrid>
-    </ImageContainer>
+      </div>
+    </div>
   );
 };
 
