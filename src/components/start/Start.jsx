@@ -18,7 +18,7 @@ const StartContainer = styled.div`
   background-size: cover;
   background-position: center;
   color: #FFFFFF;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'JetBrains Mono', monospace; /* Updated font */
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -35,6 +35,7 @@ const Title = styled.h1`
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 15px rgba(247, 37, 133, 0.7), 0 0 25px rgba(76, 201, 240, 0.7);
   animation: neonPulse 2s ease-in-out infinite alternate;
+  font-family: 'JetBrains Mono', monospace; /* Updated font */
 
   @keyframes neonPulse {
     from {
@@ -53,7 +54,7 @@ const Subtitle = styled.p`
   margin-bottom: 2rem;
   color: #E6E6FA;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
-  font-family: 'Inter', sans-serif;
+  font-family: 'JetBrains Mono', monospace; /* Updated font */
 `;
 
 const CardsContainer = styled.div`
@@ -116,6 +117,7 @@ const LevelCard = styled.div`
     text-align: center;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     z-index: 1;
+    font-family: 'JetBrains Mono', monospace; /* Updated font */
   }
 `;
 
@@ -254,7 +256,7 @@ const Start = () => {
         <LevelCard
           className="level-card"
           bgGradient="linear-gradient(135deg, #1E1E5F 0%, #00D4FF 100%)"
-          glowColor="rxjs(0, 212, 255, 0.7)"
+          glowColor="rgba(0, 212, 255, 0.7)" /* Fixed typo: rxjs to rgba */
           onClick={handleLevelClick}
         >
           <NightsStayIcon />

@@ -8,12 +8,12 @@ const UserContainer = styled.div`
   min-height: 100vh;
   background: linear-gradient(to bottom right, #FF0066, #00DDEB);
   padding: 2rem;
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'JetBrains Mono', monospace; /* Updated font */
 `;
 
 const Table = styled.table`
   width: 100%;
-  max-width: 800px;
+  max-width: 1100px;
   border-collapse: collapse;
   background: #1A1A2E;
   border-radius: 12px;
@@ -28,6 +28,7 @@ const TableHeader = styled.th`
   font-size: 1.2rem;
   text-transform: uppercase;
   text-align: left;
+  font-family: 'JetBrains Mono', monospace; /* Updated font */
 `;
 
 const TableRow = styled.tr`
@@ -47,6 +48,7 @@ const TableCell = styled.td`
   padding: 1rem;
   color: #E6E6FA;
   font-size: 1rem;
+  font-family: 'JetBrains Mono', monospace; /* Updated font */
 `;
 
 const Title = styled.h1`
@@ -56,10 +58,11 @@ const Title = styled.h1`
   text-shadow: 0 0 10px #FFD700;
   margin-bottom: 2rem;
   text-transform: uppercase;
+  font-family: 'JetBrains Mono', monospace; /* Updated font */
 `;
 
 const Record = () => {
-  // Фейковый датасет
+  // Fake dataset
   const levels = ['Day City', 'Night Run', 'Rain Rush'];
   const characters = ['Blaze', 'Shadow', 'Nova'];
 
@@ -85,7 +88,7 @@ const Record = () => {
         <tbody>
           {fakeData.map((data) => (
             <TableRow key={data.id}>
-              <TableCell>{data.id34}</TableCell>
+              <TableCell>{data.id}</TableCell> {/* Fixed: data.id34 to data.id */}
               <TableCell>{data.level}</TableCell>
               <TableCell>{data.character}</TableCell>
               <TableCell>{data.score}</TableCell>

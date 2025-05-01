@@ -27,7 +27,7 @@ const GameContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: #1a1a2e;
+  background: linear-gradient(to bottom, #1a1a2e, #16213e);
   width: 100vw;
   height: 100vh;
   overflow: hidden;
@@ -38,7 +38,43 @@ const GameContainer = styled.div`
 const Canvas = styled.canvas`
   width: 100%;
   height: 100%;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  position: absolute;
+  top: 0;
+  left: 0;
+`;
+
+const CityBackground = styled.div`
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  background: url('https://images.unsplash.com/photo-1557761469-f29c6e201784?q=80&w=2049&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D') repeat-x;
+  background-size: auto 100%;
+  z-index: 0;
+  opacity: 0.8;
+`;
+
+const Road = styled.div`
+  position: absolute;
+  bottom: 0;
+  width: 200%;
+  height: 100px;
+  background: #333;
+  z-index: 1;
+`;
+
+const RoadLines = styled.div`
+  position: absolute;
+  bottom: 50px;
+  width: 200%;
+  height: 4px;
+  background: repeating-linear-gradient(
+    to right,
+    #fff,
+    #fff 50px,
+    transparent 50px,
+    transparent 100px
+  );
+  z-index: 2;
 `;
 
 const ScoreDisplay = styled.div`
@@ -151,11 +187,13 @@ const SkateboardImage = styled.div`
   }
 `;
 
-// Cache for all elixir images to prevent flickering
 const elixirImageCache = {};
 
 const SkateNovaGame = () => {
   const canvasRef = useRef(null);
+  const cityRef = useRef(null);
+  const roadRef = useRef(null);
+  const roadLinesRef = useRef(null);
   const scoreRef = useRef(null);
   const stageRef = useRef(null);
   const stageCompleteRef = useRef(null);
@@ -167,7 +205,6 @@ const SkateNovaGame = () => {
   const [timeLeft, setTimeLeft] = useState(60);
   const [stageScores, setStageScores] = useState([]);
   const [finalScore, setFinalScore] = useState(0);
-  const pointPopupsRef = useRef([]);
   const location = useLocation();
   const characterName = new URLSearchParams(location.search).get('character') || 'Blaze';
   const character = characters[characterName] || characters.Blaze;
@@ -176,10 +213,16 @@ const SkateNovaGame = () => {
   const errorSound = useRef(new Audio(soundError));
   const victorySound = useRef(new Audio(victory));
   const defeatSound = useRef(new Audio(defeats));
+  const backgroundTween = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
+
+    // Initialize background elements
+    const city = cityRef.current;
+    const road = roadRef.current;
+    const roadLines = roadLinesRef.current;
 
     // Preload the character image
     const preloadImage = () => {
@@ -211,6 +254,16 @@ const SkateNovaGame = () => {
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+
+      // Position road at bottom
+      if (road) {
+        road.style.height = '100px';
+        road.style.bottom = '0';
+      }
+
+      if (roadLines) {
+        roadLines.style.bottom = '50px';
+      }
     };
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
@@ -226,8 +279,7 @@ const SkateNovaGame = () => {
       jumping: false,
     };
 
-    let elixirs = []; // Renamed from bonuses/obstacles to elixirs
-    let pointPopups = [];
+    let elixirs = [];
     let gameOver = false;
     let stageComplete = false;
     let levelComplete = false;
@@ -236,7 +288,6 @@ const SkateNovaGame = () => {
 
     // Define elixirs with clear point values and effects
     const elixirTypes = [
-      // Good elixirs (bonuses)
       {
         image: good1,
         points: 10,
@@ -264,7 +315,6 @@ const SkateNovaGame = () => {
         width: 38,
         height: 52
       },
-      // Bad elixirs (penalties)
       {
         image: bad1,
         points: -5,
@@ -294,25 +344,57 @@ const SkateNovaGame = () => {
       }
     ];
 
+    // Start infinite background animation with seamless looping
+    const startBackgroundAnimation = () => {
+      // Clear any existing tween
+      if (backgroundTween.current) {
+        backgroundTween.current.kill();
+      }
+
+      // Reset positions
+      city.style.left = '0';
+      road.style.left = '0';
+      roadLines.style.left = '0';
+
+      // Create a single looping animation
+      backgroundTween.current = gsap.to([city, road, roadLines], {
+        x: '-50%', // Move to half the width (since width is 200%)
+        duration: 10 / (baseTrackSpeed / 3),
+        ease: 'linear',
+        repeat: -1,
+        onUpdate: () => {
+          // Reset position to create seamless loop
+          const currentX = gsap.getProperty(city, 'x');
+          if (currentX <= -window.innerWidth) {
+            gsap.set([city, road, roadLines], { x: 0 });
+          }
+        }
+      });
+    };
+
+    // Adjust animation speed based on game speed
+    const updateBackgroundSpeed = () => {
+      if (backgroundTween.current) {
+        backgroundTween.current.timeScale(baseTrackSpeed / 3);
+      }
+    };
+
     // Spawn an elixir at random position
     const spawnElixir = () => {
       if (gameOver || stageComplete || levelComplete) return;
 
-      // Random elixir with weighted probability (more good elixirs in earlier stages)
-      const goodProbability = 0.7 - (stage * 0.1); // Decreases with stage level
+      const goodProbability = 0.7 - (stage * 0.1);
       const isGoodElixir = Math.random() < goodProbability;
 
-      // Filter by type and select random elixir
       const availableElixirs = elixirTypes.filter(e => isGoodElixir ? e.type === 'good' : e.type === 'bad');
       const elixir = availableElixirs[Math.floor(Math.random() * availableElixirs.length)];
 
-      // Calculate random Y position (higher positions are harder to reach)
       const minHeight = canvas.height - 140;
       const maxHeight = canvas.height - 300;
       const y = minHeight - Math.random() * (minHeight - maxHeight);
 
       elixirs.push({
-        x: canvas.width + Math.random() * 500, // Spawn off-screen to the right
+        x: canvas.width + Math.random() * 500,
         y: y,
         width: elixir.width,
         height: elixir.height,
@@ -321,19 +403,18 @@ const SkateNovaGame = () => {
         name: elixir.name,
         effect: elixir.effect,
         type: elixir.type,
-        rotation: 0, // For animation
-        scale: 1, // For animation
-        opacity: 1 // For animation
+        rotation: 0,
+        scale: 1,
+        opacity: 1
       });
     };
 
     // Spawn elixirs at different rates depending on stage
     const elixirInterval = setInterval(() => {
-      // Higher stages have more frequent elixirs
       if (Math.random() < (0.3 + stage * 0.1)) {
         spawnElixir();
       }
-    }, 1000 - (stage * 100)); // Faster spawning in higher stages
+    }, 1000 - (stage * 100));
 
     const stageTimer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -413,40 +494,38 @@ const SkateNovaGame = () => {
       popup.style.left = `${x}px`;
       popup.style.top = `${y}px`;
       popup.style.color = points > 0 ? '#4CC9F0' : '#FF006E';
-      popup.style.fontSize = '1.4rem';
+      popup.style.fontSize = '1.2rem';
       popup.style.fontWeight = 'bold';
-      popup.style.textShadow = '0 0 8px rgba(0, 0, 0, 0.8)';
-      popup.style.padding = '5px 10px';
-      popup.style.borderRadius = '5px';
-      popup.style.minWidth = '60px';
+      popup.style.textShadow = '0 0 5px rgba(0, 0, 0, 0.5)';
+      popup.style.padding = '3px 8px';
+      popup.style.borderRadius = '4px';
+      popup.style.minWidth = '40px';
       popup.style.textAlign = 'center';
       popup.style.fontFamily = 'Orbitron, sans-serif';
       popup.style.zIndex = '15';
       popup.style.pointerEvents = 'none';
       popup.style.opacity = '0';
+      popup.style.transition = 'all 0.3s ease-out';
 
-      // Set background and border based on points
-      popup.style.background = points > 0 ? 'rgba(76, 201, 240, 0.3)' : 'rgba(255, 0, 110, 0.3)';
-      popup.style.border = `1px solid ${points > 0 ? '#4CC9F0' : '#FF006E'}`;
+      popup.style.background = points > 0 ? 'rgba(76, 201, 240, 0.2)' : 'rgba(255, 0, 110, 0.2)';
+      popup.style.border = `1px solid ${points > 0 ? 'rgba(76, 201, 240, 0.5)' : 'rgba(255, 0, 110, 0.5)'}`;
 
-      // Show point value with sign
       popup.textContent = `${points > 0 ? '+' : ''}${points}`;
 
       document.body.appendChild(popup);
 
-      // Smooth animation with GSAP
       gsap.to(popup, {
         opacity: 1,
-        y: -30,
-        duration: 0.4,
-        ease: "power2.out",
+        y: -20,
+        duration: 0.3,
+        ease: "power1.out",
         onComplete: () => {
           gsap.to(popup, {
             opacity: 0,
-            y: -50,
-            duration: 0.5,
-            delay: 0.3,
-            ease: "power2.in",
+            y: -40,
+            duration: 0.4,
+            delay: 0.2,
+            ease: "power1.in",
             onComplete: () => {
               document.body.removeChild(popup);
             },
@@ -465,22 +544,21 @@ const SkateNovaGame = () => {
         duration: 0.5,
         onStart: () => {
           gsap.to(canvasRef.current, {
-            boxShadow: '0 0 40px rgba(76, 201, 240, 0.9)',
+            boxShadow: '0 0 30px rgba(76, 201, 240, 0.7)',
             duration: 0.3,
-            repeat: 5,
+            repeat: 3,
             yoyo: true,
           });
           gsap.to(scoreRef.current, {
-            scale: 1.5,
-            duration: 0.5,
-            repeat: 3,
+            scale: 1.3,
+            duration: 0.4,
+            repeat: 2,
             yoyo: true,
           });
         },
         onComplete: () => {
           setTimeout(() => {
             gsap.to(stageCompleteRef.current, { opacity: 0, scale: 1 });
-
             setStage((prev) => prev + 1);
             setTimeLeft(prev => prev === 60 ? 120 : 180);
             setScore(0);
@@ -491,6 +569,7 @@ const SkateNovaGame = () => {
             player.jumping = false;
             elixirs = [];
             baseTrackSpeed += 0.5;
+            updateBackgroundSpeed();
             stageComplete = false;
           }, 2000);
         },
@@ -501,11 +580,9 @@ const SkateNovaGame = () => {
       levelComplete = true;
       victorySound.current.play();
 
-      // Calculate final score (sum of all stage scores + current score)
       const totalScore = stageScores.reduce((sum, s) => sum + s, 0) + score;
       setFinalScore(totalScore);
 
-      // Create level complete message
       const levelCompleteElement = levelCompleteRef.current;
       if (levelCompleteElement) {
         levelCompleteElement.innerHTML = `
@@ -516,20 +593,17 @@ const SkateNovaGame = () => {
           <div id="skateboard-image"></div>
         `;
 
-        // Animate level complete message
         gsap.to(levelCompleteElement, {
           opacity: 1,
           scale: 1,
           duration: 0.8,
           ease: "elastic.out(1, 0.5)",
           onStart: () => {
-            // Create trophy particle effects
             createParticles();
-
             gsap.to(canvasRef.current, {
-              boxShadow: '0 0 50px rgba(76, 201, 240, 0.9)',
-              duration: 0.5,
-              repeat: 3,
+              boxShadow: '0 0 40px rgba(76, 201, 240, 0.8)',
+              duration: 0.4,
+              repeat: 2,
               yoyo: true,
             });
           }
@@ -539,13 +613,13 @@ const SkateNovaGame = () => {
 
     // Create celebration particles
     const createParticles = () => {
-      const particleCount = 50;
+      const particleCount = 30;
       const colors = ['#4CC9F0', '#F72585', '#7209B7', '#3A0CA3', '#4361EE'];
 
       for (let i = 0; i < particleCount; i++) {
         const particle = document.createElement('div');
         particle.style.position = 'absolute';
-        particle.style.width = `${Math.random() * 10 + 5}px`;
+        particle.style.width = `${Math.random() * 8 + 4}px`;
         particle.style.height = particle.style.width;
         particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         particle.style.borderRadius = '50%';
@@ -555,12 +629,11 @@ const SkateNovaGame = () => {
         particle.style.zIndex = '25';
         document.body.appendChild(particle);
 
-        // Animate particle
         gsap.to(particle, {
-          x: (Math.random() - 0.5) * window.innerWidth * 0.8,
-          y: (Math.random() - 0.5) * window.innerHeight * 0.8,
+          x: (Math.random() - 0.5) * window.innerWidth * 0.6,
+          y: (Math.random() - 0.5) * window.innerHeight * 0.6,
           opacity: 0,
-          duration: Math.random() * 2 + 1,
+          duration: Math.random() * 1.5 + 0.5,
           ease: "power2.out",
           onComplete: () => {
             document.body.removeChild(particle);
@@ -575,7 +648,7 @@ const SkateNovaGame = () => {
       defeatSound.current.play();
       gsap.to(gameOverRef.current, {
         opacity: 1,
-        scale: 1.2,
+        scale: 1.1,
         duration: 0.5,
         onComplete: () => {
           setTimeout(() => {
@@ -585,6 +658,7 @@ const SkateNovaGame = () => {
             setScore(0);
             setStageScores([]);
             baseTrackSpeed = 3;
+            updateBackgroundSpeed();
             player.x = 100;
             player.y = canvas.height - 100;
             player.dx = 0;
@@ -601,13 +675,22 @@ const SkateNovaGame = () => {
     const update = () => {
       if (gameOver || stageComplete || levelComplete) return requestAnimationFrame(update);
 
-      // Clear canvas and draw background
-      ctx.fillStyle = '#1a1a2e';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Clear canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Draw floor
-      ctx.fillStyle = '#333';
-      ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+      // Draw player shadow
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      ctx.beginPath();
+      ctx.ellipse(
+        player.x + player.width / 2,
+        canvas.height - 100,
+        player.width / 2,
+        10,
+        0,
+        0,
+        Math.PI * 2
+      );
+      ctx.fill();
 
       // Update player position
       player.x += player.dx;
@@ -632,28 +715,24 @@ const SkateNovaGame = () => {
         ctx.drawImage(playerImageRef.current, player.x, player.y, player.width, player.height);
       } else {
         ctx.fillStyle = 'red';
-        ctx.fillRect(player.x, player.y, player.width, player.height); // Fallback
+        ctx.fillRect(player.x, player.y, player.width, player.height);
       }
 
       // Draw and update elixirs
       elixirs.forEach((elixir, i) => {
-        // Update elixir position
         elixir.x -= baseTrackSpeed;
-        elixir.rotation += 0.02; // Rotate slowly for visual effect
+        elixir.rotation += 0.02;
 
-        // Remove if off-screen
         if (elixir.x + elixir.width < 0) {
           elixirs.splice(i, 1);
           return;
         }
 
-        // Save context for rotation/animation
         ctx.save();
         ctx.translate(elixir.x + elixir.width / 2, elixir.y + elixir.height / 2);
         ctx.rotate(elixir.rotation);
         ctx.globalAlpha = elixir.opacity;
 
-        // Draw elixir using cached image
         if (elixirImageCache[elixir.image]) {
           ctx.drawImage(
             elixirImageCache[elixir.image],
@@ -666,33 +745,28 @@ const SkateNovaGame = () => {
 
         ctx.restore();
 
-        // Collision detection with player
         if (
           player.x < elixir.x + elixir.width &&
           player.x + player.width > elixir.x &&
           player.y < elixir.y + elixir.height &&
           player.y + player.height > elixir.y
         ) {
-          // Collision effect
           elixir.opacity = 0;
 
-          // Play appropriate sound
           if (elixir.type === 'good') {
+            successSound.current.volume = 0.3;
             successSound.current.play();
           } else {
+            errorSound.current.volume = 0.3;
             errorSound.current.play();
           }
 
-          // Remove elixir from array
           elixirs.splice(i, 1);
 
-          // Update score with smooth animation
           setScore((prev) => {
             const newScore = Math.max(0, prev + elixir.points);
-            // Show point popup with elixir name
             showPointPopup(elixir.points, player.x + player.width, player.y);
 
-            // Check for stage completion
             if (newScore >= scoreThreshold && timeLeft > 0) {
               if (stage < 3) {
                 completeStage();
@@ -703,40 +777,36 @@ const SkateNovaGame = () => {
             return newScore;
           });
 
-          // Animate score display
           if (elixir.type === 'good') {
             gsap.to(scoreRef.current, {
-              scale: 1.3,
+              scale: 1.2,
               color: '#4CC9F0',
-              duration: 0.2,
+              duration: 0.15,
               yoyo: true,
               repeat: 1
             });
           } else {
             gsap.to(scoreRef.current, {
-              scale: 0.9,
+              scale: 0.95,
               color: '#FF006E',
-              duration: 0.2,
+              duration: 0.15,
               yoyo: true,
               repeat: 1
             });
           }
 
-          // Screen effect based on elixir type
           if (elixir.type === 'bad') {
-            // Subtle screen shake for bad elixirs
             gsap.to(canvasRef.current, {
-              x: 3,
-              duration: 0.1,
+              x: 2,
+              duration: 0.08,
               yoyo: true,
-              repeat: 2,
+              repeat: 1,
               ease: "power2.inOut"
             });
           } else {
-            // Subtle glow for good elixirs
             gsap.to(canvasRef.current, {
-              boxShadow: '0 0 15px rgba(76, 201, 240, 0.6)',
-              duration: 0.2,
+              boxShadow: '0 0 10px rgba(76, 201, 240, 0.5)',
+              duration: 0.15,
               yoyo: true,
               repeat: 1
             });
@@ -747,6 +817,8 @@ const SkateNovaGame = () => {
       requestAnimationFrame(update);
     };
 
+    // Start the game
+    startBackgroundAnimation();
     update();
 
     return () => {
@@ -760,11 +832,17 @@ const SkateNovaGame = () => {
       clearInterval(stageTimer);
       clearInterval(elixirInterval);
       skateboardSound.current.pause();
+      if (backgroundTween.current) {
+        backgroundTween.current.kill();
+      }
     };
   }, [character, stage]);
 
   return (
     <GameContainer>
+      <CityBackground ref={cityRef} />
+      <Road ref={roadRef} />
+      <RoadLines ref={roadLinesRef} />
       <ScoreDisplay ref={scoreRef}>Score: {score}</ScoreDisplay>
       <StageDisplay ref={stageRef}>
         Stage {stage} - Time: {timeLeft}s

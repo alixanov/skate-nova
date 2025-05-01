@@ -52,6 +52,8 @@ const ImageContainer = styled.div`
   min-height: 100vh;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
+  font-family: 'JetBrains Mono', monospace;
 `;
 
 const Title = styled.h2`
@@ -60,7 +62,7 @@ const Title = styled.h2`
   text-shadow: 0 0 12px rgba(247, 37, 133, 0.8);
   margin-bottom: 1rem;
   text-align: center;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
 `;
 
 const Subtitle = styled.p`
@@ -70,13 +72,13 @@ const Subtitle = styled.p`
   margin-bottom: 1rem;
   text-align: center;
   max-width: 600px;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
 `;
 
 const CharactersGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
   width: 100%;
   margin-top: 2rem;
   z-index: 2;
@@ -85,7 +87,7 @@ const CharactersGrid = styled.div`
 const CharacterCard = styled.div`
   background: ${({ bgGradient }) => bgGradient};
   border-radius: 15px;
-  padding: 1.5rem;
+  padding: 1.2rem;
   text-align: center;
   transition: transform 0.4s ease, box-shadow 0.4s ease;
   backdrop-filter: blur(8px);
@@ -93,6 +95,7 @@ const CharacterCard = styled.div`
   position: relative;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px ${({ glowColor }) => glowColor};
+  box-sizing: border-box;
 
   &:hover {
     transform: translateY(-12px) scale(1.02);
@@ -100,13 +103,13 @@ const CharacterCard = styled.div`
   }
 
   @media (max-width: 600px) {
-    padding: 1rem;
+    padding: 0.8rem;
   }
 `;
 
 const CharacterImage = styled.img`
   width: 100%;
-  max-width: 200px;
+  max-width: 180px;
   height: auto;
   border-radius: 8px;
   margin-bottom: 1rem;
@@ -114,7 +117,7 @@ const CharacterImage = styled.img`
 `;
 
 const CharacterName = styled.h3`
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   color: #fff;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
   margin-bottom: 0.5rem;
@@ -122,26 +125,29 @@ const CharacterName = styled.h3`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
 `;
 
 const CharacterDescription = styled.p`
-  font-size: 1rem;
+  font-size: 0.95rem;
   color: #e0e0e0;
   margin-bottom: 0.5rem;
+  font-family: 'JetBrains Mono', monospace;
 `;
 
 const CharacterSkill = styled.p`
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #4CC9F0;
   margin-bottom: 0.5rem;
   font-weight: bold;
+  font-family: 'JetBrains Mono', monospace;
 `;
 
 const FullDescription = styled.p`
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: #b0b0b0;
   font-style: italic;
+  font-family: 'JetBrains Mono', monospace;
 `;
 
 const SelectButton = styled.button`
@@ -154,7 +160,7 @@ const SelectButton = styled.button`
   cursor: pointer;
   margin-top: 1rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'JetBrains Mono', monospace;
 
   &:hover {
     transform: scale(1.1);
