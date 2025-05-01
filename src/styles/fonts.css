@@ -1,0 +1,18 @@
+@font-face {
+  font-family: 'Bungee';
+  src: url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Bungee';
+  src: url('https://fonts.googleapis.com/css2?family=Bungee:wght@700&display=swap');
+  font-weight: 700;
+  font-style: normal;
+}
+
+/* Глобальное применение шрифта */
+body {
+  font-family: 'Bungee', sans-serif;
+}
