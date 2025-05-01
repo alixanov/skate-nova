@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import NightsStayIcon from '@mui/icons-material/NightsStay';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import bgskateboard from '../../assets/backiee-183922-landscape.jpg';
 
 const StartContainer = styled.div`
@@ -222,6 +223,10 @@ const Start = () => {
     navigate('/images-people');
   };
 
+  const handleRecordClick = () => {
+    navigate('/record');
+  };
+
   return (
     <StartContainer>
       <NeonWave>
@@ -249,7 +254,7 @@ const Start = () => {
         <LevelCard
           className="level-card"
           bgGradient="linear-gradient(135deg, #1E1E5F 0%, #00D4FF 100%)"
-          glowColor="rgba(0, 212, 255, 0.7)"
+          glowColor="rxjs(0, 212, 255, 0.7)"
           onClick={handleLevelClick}
         >
           <NightsStayIcon />
@@ -264,6 +269,16 @@ const Start = () => {
         >
           <WaterDropIcon />
           <span>Level 3<br />Rain Rush</span>
+        </LevelCard>
+
+        <LevelCard
+          className="level-card"
+          bgGradient="linear-gradient(135deg, #FFD700 0%, #FF0066 100%)"
+          glowColor="rgba(255, 215, 0, 0.7)"
+          onClick={handleRecordClick}
+        >
+          <EmojiEventsIcon />
+          <span>Records</span>
         </LevelCard>
       </CardsContainer>
     </StartContainer>
