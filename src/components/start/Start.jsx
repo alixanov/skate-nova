@@ -7,7 +7,7 @@ import NightsStayIcon from '@mui/icons-material/NightsStay';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LockIcon from '@mui/icons-material/Lock';
-import bgskateboard from '../../assets/backiee-183922-landscape.jpg';
+import bgskateboard from '../../assets/backiee-255038-landscape.jpg';
 import ramka from '../../assets/gas-kvas-com-p-chernaya-ramka-dlya-nadpisi-na-prozrachnom-41.png';
 
 const StartContainer = styled.div`
@@ -73,40 +73,26 @@ const LevelCard = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: ${props => props.bgGradient || 'rgba(255, 255, 255, 0.2)'};
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
   color: #FFFFFF;
-  border-radius: 16px;
+  border-radius: 11px;
   cursor: ${props => (props.locked ? 'not-allowed' : 'pointer')};
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.3), 0 8px 25px rgba(0, 0, 0, 0.2);
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   opacity: ${props => (props.locked ? 0.6 : 1)};
 
   ${props => !props.locked && `
     &:hover {
       transform: translateY(-5px) scale(1.03);
-      box-shadow: 0 12px 30px ${props.glowColor || 'rgba(0, 0, 0, 0.4)'};
-      
-      &:after {
-        opacity: 1;
-      }
+      box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.4), 0 12px 30px ${props.glowColor || 'rgba(0, 0, 0, 0.4)'};
+      backdrop-filter: blur(12px);
     }
   `}
-
-  &:after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at center, ${props => props.glowColor || 'rgba(255,255,255,0.2)'} 0%, transparent 70%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
 
   svg {
     font-size: 3rem;
@@ -291,7 +277,6 @@ const Start = () => {
       <CardsContainer>
         <LevelCard
           className="level-card"
-          bgGradient="linear-gradient(135deg, #FF006E 0%, #FFD60A 100%)"
           glowColor="rgba(255, 0, 110, 0.7)"
           onClick={handleLevelClick}
           locked={false}
@@ -302,7 +287,6 @@ const Start = () => {
 
         <LevelCard
           className="level-card"
-          bgGradient="linear-gradient(135deg, #1E1E5F 0%, #00D4FF 100%)"
           glowColor="rgba(0, 212, 255, 0.7)"
           onClick={unlockedLevels.includes(2) ? handleLevelClick : undefined}
           locked={!unlockedLevels.includes(2)}
@@ -319,7 +303,6 @@ const Start = () => {
 
         <LevelCard
           className="level-card"
-          bgGradient="linear-gradient(135deg, #2A4D69 0%, #00F4D6 100%)"
           glowColor="rgba(0, 244, 214, 0.7)"
           onClick={unlockedLevels.includes(3) ? handleLevelClick : undefined}
           locked={!unlockedLevels.includes(3)}
@@ -336,7 +319,6 @@ const Start = () => {
 
         <LevelCard
           className="level-card"
-          bgGradient="linear-gradient(135deg, #FFD700 0%, #FF0066 100%)"
           glowColor="rgba(255, 215, 0, 0.7)"
           onClick={handleRecordClick}
           locked={false}
