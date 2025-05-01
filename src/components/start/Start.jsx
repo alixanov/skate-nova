@@ -12,15 +12,16 @@ const StartContainer = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
   background: linear-gradient(rgba(8, 24, 68, 0.75), rgba(98, 0, 234, 0.75)), url(${bgskateboard});
   background-size: cover;
   background-position: center;
   color: #FFFFFF;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Orbitron', sans-serif;
   text-align: center;
   position: relative;
   overflow: hidden;
+  padding: 2rem;
 `;
 
 const Title = styled.h1`
@@ -32,42 +33,88 @@ const Title = styled.h1`
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 15px rgba(247, 37, 133, 0.7), 0 0 25px rgba(76, 201, 240, 0.7);
+  animation: neonPulse 2s ease-in-out infinite alternate;
+
+  @keyframes neonPulse {
+    from {
+      text-shadow: 0 0 15px rgba(247, 37, 133, 0.7), 0 0 25px rgba(76, 201, 240, 0.7), 0 0 35px rgba(255, 255, 255, 0.5);
+    }
+    to {
+      text-shadow: 0 0 25px rgba(247, 37, 133, 0.9), 0 0 35px rgba(76, 201, 240, 0.9), 0 0 45px rgba(255, 255, 255, 0.7);
+    }
+  }
 `;
 
 const Subtitle = styled.p`
   font-size: 1.3rem;
   font-weight: 400;
   max-width: 500px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   color: #E6E6FA;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  font-family: 'Inter', sans-serif;
+`;
+
+const CardsContainer = styled.div`
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  max-width: 900px;
+  margin: 0 auto;
 `;
 
 const LevelCard = styled.div`
+  width: 250px;
+  height: 150px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
   background: ${props => props.bgGradient || 'rgba(255, 255, 255, 0.2)'};
   color: #FFFFFF;
-  font-size: 1.4rem;
-  font-weight: 500;
-  padding: 1rem 2rem;
-  margin: 0.5rem;
   border-radius: 16px;
   cursor: pointer;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: 300px;
-  justify-content: space-between;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  padding: 1.5rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 
   &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 25px ${props => props.glowColor || 'rgba(0, 0, 0, 0.3)'};
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 12px 30px ${props => props.glowColor || 'rgba(0, 0, 0, 0.4)'};
+    
+    &:after {
+      opacity: 1;
+    }
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at center, ${props => props.glowColor || 'rgba(255,255,255,0.2)'} 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
 
   svg {
-    font-size: 2rem;
+    font-size: 3rem;
+    margin-bottom: 1rem;
     filter: drop-shadow(0 0 8px ${props => props.glowColor || '#F9A8D4'});
+  }
+
+  span {
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 1;
   }
 `;
 
@@ -126,7 +173,7 @@ const Start = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // GSAP анимация параллакса фона
+    // GSAP animations
     gsap.to('body', {
       backgroundPosition: 'center 30%',
       duration: 7,
@@ -135,21 +182,18 @@ const Start = () => {
       ease: 'sine.inOut',
     });
 
-    // Анимация появления заголовка
     gsap.fromTo(
       'h1',
-      { opacity: 0, y: -120 },
-      { opacity: 1, y: 0, duration: 1.2, ease: 'power4.out' }
+      { opacity: 0, y: -120, scale: 0.7 },
+      { opacity: 1, y: 0, scale: 1, duration: 1.2, ease: 'power4.out' }
     );
 
-    // Анимация появления подзаголовка
     gsap.fromTo(
       'p',
       { opacity: 0, y: 40 },
       { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.3 }
     );
 
-    // Анимация появления карточек
     gsap.fromTo(
       '.level-card',
       { opacity: 0, y: 60, scale: 0.8 },
@@ -164,7 +208,6 @@ const Start = () => {
       }
     );
 
-    // GSAP анимация волны
     gsap.to('.wave-layer', {
       x: '100%',
       opacity: 0.5,
@@ -186,37 +229,43 @@ const Start = () => {
         <div className="wave-layer"></div>
         <div className="wave-layer"></div>
       </NeonWave>
+
       <Title>SkateNova</Title>
       <Subtitle>
         Welcome to SkateNova — an arcade runner on a scooter! Ride along endless roads, collect bonuses, avoid obstacles and conquer unique levels!
       </Subtitle>
-      <LevelCard
-        className="level-card"
-        bgGradient="linear-gradient(to right, #FF006E, #FFD60A)"
-        glowColor="#FF006E"
-        onClick={handleLevelClick}
-      >
-        <span>Level 1 - Day City</span>
-        <WbSunnyIcon />
-      </LevelCard>
-      <LevelCard
-        className="level-card"
-        bgGradient="linear-gradient(to right, #1E1E5F, #00D4FF)"
-        glowColor="#00D4FF"
-        onClick={handleLevelClick}
-      >
-        <span>Level 2 - Night Run</span>
-        <NightsStayIcon />
-      </LevelCard>
-      <LevelCard
-        className="level-card"
-        bgGradient="linear-gradient(to right, #2A4D69, #00F4D6)"
-        glowColor="#00F4D6"
-        onClick={handleLevelClick}
-      >
-        <span>Level 3 - Rain Rush</span>
-        <WaterDropIcon />
-      </LevelCard>
+
+      <CardsContainer>
+        <LevelCard
+          className="level-card"
+          bgGradient="linear-gradient(135deg, #FF006E 0%, #FFD60A 100%)"
+          glowColor="rgba(255, 0, 110, 0.7)"
+          onClick={handleLevelClick}
+        >
+          <WbSunnyIcon />
+          <span>Level 1<br />Day City</span>
+        </LevelCard>
+
+        <LevelCard
+          className="level-card"
+          bgGradient="linear-gradient(135deg, #1E1E5F 0%, #00D4FF 100%)"
+          glowColor="rgba(0, 212, 255, 0.7)"
+          onClick={handleLevelClick}
+        >
+          <NightsStayIcon />
+          <span>Level 2<br />Night Run</span>
+        </LevelCard>
+
+        <LevelCard
+          className="level-card"
+          bgGradient="linear-gradient(135deg, #2A4D69 0%, #00F4D6 100%)"
+          glowColor="rgba(0, 244, 214, 0.7)"
+          onClick={handleLevelClick}
+        >
+          <WaterDropIcon />
+          <span>Level 3<br />Rain Rush</span>
+        </LevelCard>
+      </CardsContainer>
     </StartContainer>
   );
 };

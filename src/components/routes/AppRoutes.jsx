@@ -1,5 +1,5 @@
 import React from 'react'
-import {ImagePeople, Start} from '../'
+import {ImagePeople, Start,Game} from '../'
 import { Route, Routes } from 'react-router-dom'
 
 const AppRoutes = () => {
@@ -8,6 +8,7 @@ const AppRoutes = () => {
       <Routes>
         <Route path={"/"} element={<Start />} />
         <Route path={"/images-people"} element={<ImagePeople />} />
+        <Route path={"/game"} element={<Game />} />
       </Routes>
     </div>
   )

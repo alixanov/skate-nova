@@ -1,37 +1,44 @@
 import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { gsap } from 'gsap';
-import blaze from '../../assets/1.png'; // Предполагается, что изображения обновлены
+import { useNavigate } from 'react-router-dom';
+import blaze from '../../assets/1.png';
 import shadow from '../../assets/2.png';
 import nova from '../../assets/3.png';
 
 const characters = [
   {
     name: 'Blaze',
-    description: 'Пламя улиц. Скорость — его стихия.',
-    fullDescription: 'Пролетает мимо, оставляя искры. Огонь в глазах, дерзость в движениях.',
-    skill: 'Мгновенный буст скорости и эффектный старт.',
+    description: 'Street Flame. Speed is his element.',
+    fullDescription: 'Flies by, leaving sparks. Fire in his eyes, audacity in his moves.',
+    skill: 'Instant speed boost and spectacular start.',
     image: blaze,
     emoji: '🔥',
     animation: 'blaze',
+    bgGradient: 'linear-gradient(135deg, #FF006E 0%, #FF8E53 100%)',
+    glowColor: 'rgba(255, 0, 110, 0.7)',
   },
   {
     name: 'Shadow',
-    description: 'Тень мегаполиса. Неуловим и точен.',
-    fullDescription: 'Скользит как призрак. Тихий, как ночь, опасный, как поворот.',
-    skill: 'Улучшенное управление и скрытность.',
+    description: 'Metropolis Shadow. Elusive and precise.',
+    fullDescription: 'Glides like a ghost. Quiet as night, dangerous as a turn.',
+    skill: 'Enhanced control and stealth.',
     image: shadow,
     emoji: '🌌',
     animation: 'shadow',
+    bgGradient: 'linear-gradient(135deg, #1E1E5F 0%, #00D4FF 100%)',
+    glowColor: 'rgba(0, 212, 255, 0.7)',
   },
   {
     name: 'Nova',
-    description: 'Городская звезда. Икона трюков.',
-    fullDescription: 'Танцует на трассе. Фонтаны света и бит под колёсами.',
-    skill: 'Бонус к очкам за трюки и комбо.',
+    description: 'Urban Star. Trick icon.',
+    fullDescription: 'Dances on the track. Fountains of light and beats under the wheels.',
+    skill: 'Trick points and combo bonus.',
     image: nova,
     emoji: '🌟',
     animation: 'nova',
+    bgGradient: 'linear-gradient(135deg, #2A4D69 0%, #00F4D6 100%)',
+    glowColor: 'rgba(0, 244, 214, 0.7)',
   },
 ];
 
@@ -40,7 +47,8 @@ const ImageContainer = styled.div`
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  background: linear-gradient(rgba(8, 24, 68, 0.75), rgba(98, 0, 234, 0.75)),
+              linear-gradient(to right, #F72585, #4CC9F0);
   min-height: 100vh;
   position: relative;
   overflow: hidden;
@@ -48,8 +56,8 @@ const ImageContainer = styled.div`
 
 const Title = styled.h2`
   font-size: 2.5rem;
-  color: #ff007a;
-  text-shadow: 0 0 10px rgba(255, 0, 122, 0.8);
+  color: #fff;
+  text-shadow: 0 0 12px rgba(247, 37, 133, 0.8);
   margin-bottom: 1rem;
   text-align: center;
   font-family: 'Orbitron', sans-serif;
@@ -58,7 +66,7 @@ const Title = styled.h2`
 const Subtitle = styled.p`
   font-size: 1.2rem;
   color: #e0e0e0;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
   margin-bottom: 1rem;
   text-align: center;
   max-width: 600px;
@@ -75,19 +83,20 @@ const CharactersGrid = styled.div`
 `;
 
 const CharacterCard = styled.div`
-  background: rgba(255, 255, 255, 0.05);
+  background: ${({ bgGradient }) => bgGradient};
   border-radius: 15px;
   padding: 1.5rem;
   text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  backdrop-filter: blur(5px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px ${({ glowColor }) => glowColor};
 
   &:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(255, 0, 122, 0.3);
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), 0 0 20px ${({ glowColor }) => glowColor};
   }
 
   @media (max-width: 600px) {
@@ -101,13 +110,13 @@ const CharacterImage = styled.img`
   height: auto;
   border-radius: 8px;
   margin-bottom: 1rem;
-  transition: transform 0.3s ease;
+  transition: transform 0.4s ease;
 `;
 
 const CharacterName = styled.h3`
   font-size: 1.8rem;
   color: #fff;
-  text-shadow: 0 0 8px rgba(255, 0, 122, 0.6);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.6);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
@@ -124,7 +133,7 @@ const CharacterDescription = styled.p`
 
 const CharacterSkill = styled.p`
   font-size: 0.95rem;
-  color: #ff007a;
+  color: #4CC9F0;
   margin-bottom: 0.5rem;
   font-weight: bold;
 `;
@@ -136,7 +145,7 @@ const FullDescription = styled.p`
 `;
 
 const SelectButton = styled.button`
-  background: linear-gradient(45deg, #ff007a, #ff4d00);
+  background: linear-gradient(45deg, #F72585, #4CC9F0);
   color: #fff;
   padding: 0.8rem 1.5rem;
   border: none;
@@ -144,12 +153,12 @@ const SelectButton = styled.button`
   font-size: 1rem;
   cursor: pointer;
   margin-top: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   font-family: 'Roboto', sans-serif;
 
   &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(255, 0, 122, 0.5);
+    transform: scale(1.1);
+    box-shadow: 0 0 15px rgba(76, 201, 240, 0.7);
   }
 
   &:active {
@@ -169,9 +178,10 @@ const Particle = styled.div`
 const CharacterSelect = () => {
   const containerRef = useRef(null);
   const cardRefs = useRef([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Анимация появления карточек
+    // Card appearance animations
     characters.forEach((character, index) => {
       const card = cardRefs.current[index];
       if (!card) return;
@@ -187,14 +197,14 @@ const CharacterSelect = () => {
               duration: 0.8,
               ease: 'back.out(1.7)',
               onStart: () => {
-                // Эффект искр
+                // Spark effect
                 gsap.to(card, {
-                  boxShadow: '0 0 20px rgba(255, 100, 0, 0.8)',
+                  boxShadow: `0 0 20px ${character.glowColor}`,
                   duration: 0.3,
                   repeat: 3,
                   yoyo: true,
                 });
-                // Дрожание камеры
+                // Camera shake
                 gsap.to(containerRef.current, {
                   x: '+=5',
                   y: '+=5',
@@ -216,7 +226,7 @@ const CharacterSelect = () => {
               duration: 1,
               ease: 'power2.out',
               onStart: () => {
-                // Пульсация
+                // Pulse effect
                 gsap.to(card, {
                   scale: 1.05,
                   duration: 0.5,
@@ -239,9 +249,9 @@ const CharacterSelect = () => {
               duration: 1,
               ease: 'elastic.out(1, 0.5)',
               onStart: () => {
-                // Вспышка цвета
+                // Color flash
                 gsap.to(card, {
-                  boxShadow: '0 0 30px rgba(255, 0, 255, 0.8)',
+                  boxShadow: `0 0 30px ${character.glowColor}`,
                   duration: 0.4,
                   repeat: 2,
                   yoyo: true,
@@ -255,7 +265,7 @@ const CharacterSelect = () => {
       }
     });
 
-    // Частицы воздуха
+    // Air particles
     const createParticle = () => {
       const particle = document.createElement('div');
       particle.className = 'particle';
@@ -284,19 +294,25 @@ const CharacterSelect = () => {
 
   const handleHover = (index) => {
     const card = cardRefs.current[index];
+    gsap.to(card, {
+      scale: 1.03,
+      boxShadow: `0 10px 30px rgba(0, 0, 0, 0.5), 0 0 25px ${characters[index].glowColor}`,
+      duration: 0.4,
+      ease: 'power2.out',
+    });
     switch (characters[index].animation) {
       case 'blaze':
         gsap.to(card.querySelector('img'), {
-          scale: 1.1,
-          rotation: 10,
-          duration: 0.3,
+          scale: 1.15,
+          rotation: 8,
+          duration: 0.4,
           ease: 'power2.out',
         });
         break;
       case 'shadow':
         gsap.to(card.querySelector('img'), {
-          x: -10,
-          opacity: 0.8,
+          x: -12,
+          opacity: 0.85,
           duration: 0.4,
           ease: 'sine.inOut',
           repeat: 1,
@@ -305,8 +321,8 @@ const CharacterSelect = () => {
         break;
       case 'nova':
         gsap.to(card.querySelector('img'), {
-          y: -20,
-          rotation: -5,
+          y: -25,
+          rotation: -6,
           duration: 0.5,
           ease: 'elastic.out(1, 0.5)',
         });
@@ -318,33 +334,38 @@ const CharacterSelect = () => {
 
   const handleLeave = (index) => {
     const card = cardRefs.current[index];
+    gsap.to(card, {
+      scale: 1,
+      boxShadow: `0 4px 15px rgba(0, 0, 0, 0.3), 0 0 10px ${characters[index].glowColor}`,
+      duration: 0.4,
+      ease: 'power2.out',
+    });
     gsap.to(card.querySelector('img'), {
       scale: 1,
       x: 0,
       y: 0,
       rotation: 0,
       opacity: 1,
-      duration: 0.3,
+      duration: 0.4,
       ease: 'power2.out',
     });
   };
 
   const handleSelect = (characterName) => {
-    // Анимация перехода
+    // Transition animation
     gsap.to(containerRef.current, {
       opacity: 0,
       scale: 0.8,
       duration: 0.5,
       ease: 'power2.in',
       onComplete: () => {
-        alert(`Вы выбрали ${characterName}! Готовы зажечь трассу?`);
-        // Здесь можно добавить реальный переход на уровень
+        navigate('/game');
       },
     });
 
-    // Взрывной эффект
+    // Explosive effect
     gsap.to(containerRef.current, {
-      boxShadow: '0 0 50px rgba(255, 0, 122, 0.8)',
+      boxShadow: '0 0 50px rgba(247, 37, 133, 0.8)',
       duration: 0.2,
       repeat: 2,
       yoyo: true,
@@ -353,15 +374,17 @@ const CharacterSelect = () => {
 
   return (
     <ImageContainer ref={containerRef} className="character-select">
-      <Title>🛹 ВЫБЕРИ СВОЕГО ГЕРОЯ</Title>
-      <Subtitle>SkateNova зовёт! Выбери, кто станет легендой улиц!</Subtitle>
-      <Subtitle>Трое скейт-воинов готовы покорить трассу. Кто ты в этом мире скорости?</Subtitle>
+      <Title>🛹 CHOOSE YOUR HERO</Title>
+      <Subtitle>SkateNova awaits! Pick your street legend!</Subtitle>
+      <Subtitle>Three skate warriors are ready to conquer the track. Who are you in this world of speed?</Subtitle>
 
       <CharactersGrid>
         {characters.map((character, index) => (
           <CharacterCard
             key={character.name}
             ref={(el) => (cardRefs.current[index] = el)}
+            bgGradient={character.bgGradient}
+            glowColor={character.glowColor}
             onMouseEnter={() => handleHover(index)}
             onMouseLeave={() => handleLeave(index)}
           >
@@ -370,10 +393,10 @@ const CharacterSelect = () => {
               {character.emoji} {character.name}
             </CharacterName>
             <CharacterDescription>{character.description}</CharacterDescription>
-            <CharacterSkill>Скилл: {character.skill}</CharacterSkill>
+            <CharacterSkill>Skill: {character.skill}</CharacterSkill>
             <FullDescription>{character.fullDescription}</FullDescription>
             <SelectButton onClick={() => handleSelect(character.name)}>
-              Выбрать
+              Select
             </SelectButton>
           </CharacterCard>
         ))}
