@@ -7,7 +7,8 @@ import NightsStayIcon from '@mui/icons-material/NightsStay';
 import WaterDropIcon from '@mui/icons-material/WaterDrop';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import LockIcon from '@mui/icons-material/Lock';
-import bgskateboard from '../../assets/backiee-255038-landscape.jpg';
+import XIcon from '@mui/icons-material/X';
+import bgskateboard from '../../assets/bg.png';
 import ramka from '../../assets/gas-kvas-com-p-chernaya-ramka-dlya-nadpisi-na-prozrachnom-41.png';
 
 const StartContainer = styled.div`
@@ -115,21 +116,12 @@ const LockedOverlay = styled.div`
   right: 10px;
   display: flex;
   align-items: center;
-  gap: 5px;
-  background: rgba(0, 0, 0, 0.7);
-  padding: 5px 10px;
-  border-radius: 8px;
-  border: 1px solid #FF006E;
-  box-shadow: 0 0 10px rgba(255, 0, 110, 0.5);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.9rem;
-  color: #FF006E;
-  text-shadow: 0 0 5px rgba(255, 0, 110, 0.7);
   z-index: 2;
 
   svg {
     font-size: 1.2rem;
-    filter: drop-shadow(0 0 5px #FF006E);
+    color: #F72585;
+    filter: drop-shadow(0 0 5px #F72585);
   }
 `;
 
@@ -261,6 +253,10 @@ const Start = () => {
     navigate('/record');
   };
 
+  const handleFollowClick = () => {
+    window.open('https://x.com/', '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <StartContainer>
       <NeonWave>
@@ -296,7 +292,6 @@ const Start = () => {
           {!unlockedLevels.includes(2) && (
             <LockedOverlay>
               <LockIcon />
-              Locked
             </LockedOverlay>
           )}
         </LevelCard>
@@ -312,7 +307,6 @@ const Start = () => {
           {!unlockedLevels.includes(3) && (
             <LockedOverlay>
               <LockIcon />
-              Locked
             </LockedOverlay>
           )}
         </LevelCard>
@@ -325,6 +319,17 @@ const Start = () => {
         >
           <EmojiEventsIcon />
           <span>Records</span>
+        </LevelCard>
+
+        <LevelCard
+          className="level-card"
+          glowColor="rgba(106, 255, 98, 0.7)"
+          onClick={handleFollowClick}
+          locked={false}
+          aria-label="Follow us on X"
+        >
+          <XIcon aria-hidden="true" />
+          <span>Follow us</span>
         </LevelCard>
       </CardsContainer>
     </StartContainer>
