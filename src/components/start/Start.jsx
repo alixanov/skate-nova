@@ -334,7 +334,7 @@ const Start = () => {
   };
 
   const handleFollowClick = () => {
-    window.open('https://x.com/', '_blank', 'noopener,noreferrer');
+    window.open('https://x.com/trenches_skate', '_blank', 'noopener,noreferrer');
   };
 
   return (
