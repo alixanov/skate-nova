@@ -24,8 +24,12 @@ const StartContainer = styled.div`
   font-family: 'JetBrains Mono', monospace;
   text-align: center;
   position: relative;
-  overflow: hidden;
+  overflow: auto;
   padding: 2rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -38,6 +42,7 @@ const Title = styled.h1`
   -webkit-text-fill-color: transparent;
   text-shadow: 0 0 15px rgba(247, 37, 133, 0.7), 0 0 25px rgba(76, 201, 240, 0.7);
   animation: neonPulse 2s ease-in-out infinite alternate;
+  will-change: transform, opacity;
 
   @keyframes neonPulse {
     from {
@@ -46,6 +51,15 @@ const Title = styled.h1`
     to {
       text-shadow: 0 0 25px rgba(247, 37, 133, 0.9), 0 0 35px rgba(76, 201, 240, 0.9), 0 0 45px rgba(255, 255, 255, 0.7);
     }
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 2rem;
   }
 `;
 
@@ -56,6 +70,13 @@ const Subtitle = styled.p`
   margin-bottom: 2rem;
   color: #E6E6FA;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  will-change: transform, opacity;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+    max-width: 90%;
+    margin-bottom: 1rem;
+  }
 `;
 
 const CardsContainer = styled.div`
@@ -65,6 +86,13 @@ const CardsContainer = styled.div`
   flex-wrap: wrap;
   max-width: 900px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+  }
 `;
 
 const LevelCard = styled.div`
@@ -86,9 +114,10 @@ const LevelCard = styled.div`
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.2);
   opacity: ${props => (props.locked ? 0.6 : 1)};
+  will-change: transform, opacity;
 
   ${props => !props.locked && `
-    &:hover {
+    &:active {
       transform: translateY(-5px) scale(1.03);
       box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.4), 0 12px 30px ${props.glowColor || 'rgba(0, 0, 0, 0.4)'};
       backdrop-filter: blur(12px);
@@ -108,6 +137,22 @@ const LevelCard = styled.div`
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     z-index: 1;
   }
+
+  @media (max-width: 768px) {
+    width: 90%;
+    max-width: 300px;
+    height: 120px;
+    padding: 1rem;
+
+    svg {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    span {
+      font-size: 1rem;
+    }
+  }
 `;
 
 const LockedOverlay = styled.div`
@@ -122,6 +167,15 @@ const LockedOverlay = styled.div`
     font-size: 1.2rem;
     color: #F72585;
     filter: drop-shadow(0 0 5px #F72585);
+  }
+
+  @media (max-width: 768px) {
+    top: 8px;
+    right: 8px;
+
+    svg {
+      font-size: 1rem;
+    }
   }
 `;
 
@@ -174,22 +228,37 @@ const NeonWave = styled.div`
       opacity: 0.3;
     }
   }
+
+  @media (max-width: 768px) {
+    div {
+      height: 50px;
+      opacity: 0.2;
+      animation-duration: 3s;
+    }
+
+    div:nth-child(1) {
+      animation-duration: 3s;
+    }
+    div:nth-child(2) {
+      animation-duration: 2.5s;
+    }
+    div:nth-child(3) {
+      animation-duration: 3.5s;
+    }
+  }
 `;
 
 const Start = () => {
   const navigate = useNavigate();
   const [unlockedLevels, setUnlockedLevels] = useState(() => {
-    // Initialize from localStorage or default to [1] (Level 1 unlocked)
     const saved = localStorage.getItem('unlockedLevels');
     return saved ? JSON.parse(saved) : [1];
   });
 
-  // Update localStorage when unlockedLevels changes
   useEffect(() => {
     localStorage.setItem('unlockedLevels', JSON.stringify(unlockedLevels));
   }, [unlockedLevels]);
 
-  // Function to unlock a level (can be called from game component)
   const unlockLevel = (level) => {
     if (!unlockedLevels.includes(level)) {
       setUnlockedLevels(prev => {
@@ -200,7 +269,6 @@ const Start = () => {
   };
 
   useEffect(() => {
-    // GSAP animations
     gsap.to('body', {
       backgroundPosition: 'center 30%',
       duration: 7,
@@ -212,13 +280,25 @@ const Start = () => {
     gsap.fromTo(
       'h1',
       { opacity: 0, y: -120, scale: 0.7 },
-      { opacity: 1, y: 0, scale: 1, duration: 1.2, ease: 'power4.out' }
+      {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        duration: 1,
+        ease: 'power4.out'
+      }
     );
 
     gsap.fromTo(
       'p',
       { opacity: 0, y: 40 },
-      { opacity: 1, y: 0, duration: 0.9, ease: 'power3.out', delay: 0.3 }
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.7,
+        ease: 'power3.out',
+        delay: 0.2
+      }
     );
 
     gsap.fromTo(
@@ -228,18 +308,18 @@ const Start = () => {
         opacity: 1,
         y: 0,
         scale: 1,
-        duration: 0.8,
-        stagger: 0.2,
+        duration: 0.6,
+        stagger: 0.15,
         ease: 'back.out(1.5)',
-        delay: 0.5,
+        delay: 0.3,
       }
     );
 
     gsap.to('.wave-layer', {
       x: '100%',
       opacity: 0.5,
-      duration: 4,
-      stagger: 1,
+      duration: 3,
+      stagger: 0.8,
       repeat: -1,
       ease: 'none',
     });

@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import blaze from '../../assets/1.png';
 import shadow from '../../assets/2.png';
 import nova from '../../assets/3.png';
-import personaj from "../../assets/personaj.jpg"
+import personaj from "../../assets/personaj.jpg";
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 
 const characters = [
   {
@@ -14,9 +15,9 @@ const characters = [
     image: blaze,
     emoji: '🔥',
     animation: 'blaze',
-    bgGradient: 'linear-gradient(135deg, #FF416C 0%, #FF9900 100%)', // Hot red to orange
-    glowColor: 'rgba(255, 65, 108, 0.7)', // Neon red glow
-    cornerColor: '#FF9900', // Orange accent
+    bgGradient: 'linear-gradient(135deg, #FF416C 0%, #FF9900 100%)',
+    glowColor: 'rgba(255, 65, 108, 0.7)',
+    cornerColor: '#FF9900',
     isLocked: false,
     statusBadge: 'READY'
   },
@@ -28,9 +29,9 @@ const characters = [
     image: shadow,
     emoji: '🌌',
     animation: 'shadow',
-    bgGradient: 'linear-gradient(135deg, #303F9F 0%, #00C9FF 100%)', // Deep blue to cyan
-    glowColor: 'rgba(0, 201, 255, 0.7)', // Cyan glow
-    cornerColor: '#7F00FF', // Purple accent
+    bgGradient: 'linear-gradient(135deg, #303F9F 0%, #00C9FF 100%)',
+    glowColor: 'rgba(0, 201, 255, 0.7)',
+    cornerColor: '#7F00FF',
     isLocked: true,
     statusBadge: 'LOCKED'
   },
@@ -42,9 +43,9 @@ const characters = [
     image: nova,
     emoji: '🌟',
     animation: 'nova',
-    bgGradient: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)', // Instagram-inspired gradient
-    glowColor: 'rgba(252, 176, 69, 0.7)', // Gold glow
-    cornerColor: '#fd1d1d', // Red accent
+    bgGradient: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
+    glowColor: 'rgba(252, 176, 69, 0.7)',
+    cornerColor: '#fd1d1d',
     isLocked: true,
     statusBadge: 'LOCKED'
   },
@@ -56,24 +57,23 @@ const CharacterSelect = () => {
   const navigate = useNavigate();
   const [selectedIndex, setSelectedIndex] = useState(null);
 
+  const goToMainPage = () => {
+    navigate('/');
+  };
+
   useEffect(() => {
-    // Create background effect
     const container = containerRef.current;
     if (!container) return;
 
-    // Create dynamic background elements
     for (let i = 0; i < 40; i++) {
       const element = document.createElement('div');
       element.className = 'bg-element';
-
-      // Randomize properties
       const size = Math.random() * 100 + 50;
       const posX = Math.random() * 100;
       const posY = Math.random() * 100;
       const duration = Math.random() * 50 + 30;
       const delay = Math.random() * -50;
 
-      // Apply styles
       element.style.width = `${size}px`;
       element.style.height = `${size}px`;
       element.style.left = `${posX}%`;
@@ -89,7 +89,6 @@ const CharacterSelect = () => {
       container.appendChild(element);
     }
 
-    // Add animation keyframes
     const styleSheet = document.createElement('style');
     styleSheet.innerHTML = `
       @keyframes float {
@@ -121,7 +120,6 @@ const CharacterSelect = () => {
     `;
     document.head.appendChild(styleSheet);
 
-    // Card entrance animations
     cardRefs.current.forEach((card, index) => {
       if (!card) return;
 
@@ -170,17 +168,14 @@ const CharacterSelect = () => {
 
     setSelectedIndex(index);
 
-    // Add selection animation
     const card = cardRefs.current[index];
     if (card) {
       card.style.animation = 'pulse 0.6s ease infinite';
 
-      // Create energy burst effect
       for (let i = 0; i < 20; i++) {
         const particle = document.createElement('div');
         particle.className = 'energy-particle';
 
-        // Style the particle
         particle.style.position = 'absolute';
         particle.style.width = `${Math.random() * 10 + 5}px`;
         particle.style.height = particle.style.width;
@@ -191,7 +186,6 @@ const CharacterSelect = () => {
 
         card.appendChild(particle);
 
-        // Animate the particle
         const angle = Math.random() * Math.PI * 2;
         const distance = Math.random() * 100 + 50;
         const duration = Math.random() * 0.5 + 0.5;
@@ -206,7 +200,6 @@ const CharacterSelect = () => {
       }
     }
 
-    // Navigate after animation
     setTimeout(() => {
       navigate(`/game?character=${characterName}`);
     }, 1000);
@@ -229,7 +222,11 @@ const CharacterSelect = () => {
         fontWeight: 400
       }}
     >
-      {/* Animated title */}
+      <ChevronLeftIcon
+        onClick={goToMainPage}
+        sx={{ color: 'white', fontSize: 45, position: 'absolute', top: '20px', left: '20px', zIndex: 100, cursor: 'pointer' }}
+      />
+
       <div
         style={{
           position: 'relative',
@@ -270,7 +267,6 @@ const CharacterSelect = () => {
           CHOOSE YOUR LEGEND
         </div>
 
-        {/* Horizontal line with glow */}
         <div
           style={{
             width: '100%',
@@ -285,7 +281,6 @@ const CharacterSelect = () => {
         />
       </div>
 
-      {/* Character cards container */}
       <div
         style={{
           display: 'flex',
@@ -319,7 +314,6 @@ const CharacterSelect = () => {
             onMouseLeave={handleCardLeave}
             onClick={() => handleSelect(character.name, index)}
           >
-            {/* Card background effects */}
             <div
               style={{
                 position: 'absolute',
@@ -332,7 +326,6 @@ const CharacterSelect = () => {
               }}
             />
 
-            {/* Status badge */}
             <div
               style={{
                 position: 'absolute',
@@ -354,7 +347,6 @@ const CharacterSelect = () => {
               {character.statusBadge}
             </div>
 
-            {/* Character image */}
             <div
               style={{
                 position: 'relative',
@@ -381,7 +373,6 @@ const CharacterSelect = () => {
                 }}
               />
 
-              {/* Locked overlay */}
               {character.isLocked && (
                 <div
                   style={{
@@ -409,7 +400,6 @@ const CharacterSelect = () => {
               )}
             </div>
 
-            {/* Character info */}
             <div style={{ zIndex: '5', position: 'relative' }}>
               <div
                 style={{
@@ -465,7 +455,6 @@ const CharacterSelect = () => {
                 {character.fullDescription}
               </div>
 
-              {/* Skill tag */}
               <div
                 style={{
                   background: `rgba(0, 0, 0, 0.3)`,
@@ -503,7 +492,6 @@ const CharacterSelect = () => {
               </div>
             </div>
 
-            {/* Select button */}
             <button
               style={{
                 width: '100%',
@@ -537,7 +525,6 @@ const CharacterSelect = () => {
             >
               {character.isLocked ? 'LOCKED' : 'SELECT'}
 
-              {/* Button shine effect */}
               {!character.isLocked && (
                 <div
                   style={{
@@ -554,7 +541,6 @@ const CharacterSelect = () => {
               )}
             </button>
 
-            {/* Lock message */}
             {character.isLocked && (
               <div
                 style={{
